@@ -5,12 +5,12 @@ This project is focused on building and training a Natural Language Processing m
 ## Contributing
 Contributions to the Tennis Racquet Tension App are welcome! If you have suggestions or improvements, please follow these steps:
 
-Fork the repository.
-Create a new branch (git checkout -b feature-branch).
-Make your changes.
-Commit your changes (git commit -am 'Add some feature').
-Push to the branch (git push origin feature-branch).
-Create a new Pull Request.
+- Fork the repository.
+- Create a new branch (git checkout -b feature-branch).
+- Make your changes.
+- Commit your changes (git commit -am 'Add some feature').
+- Push to the branch (git push origin feature-branch).
+- Create a new Pull Request.
 
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details.
