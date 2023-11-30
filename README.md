@@ -2,6 +2,8 @@
 ## Introduction
 This project is focused on building and training a Natural Language Processing model to detect sarcasm in textual data. Utilizing advanced machine learning techniques and NLP libraries, the goal is to accurately discern sarcastic statements in a given dataset.
 
+## Usage (How to run)
+
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details.
 
