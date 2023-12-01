@@ -13,9 +13,3 @@ data_visualization_A.py is used to plot the different f1 scores for the differen
 terminal to run. You must make sure that you use standard output to save the output
 from subtask_A.py to the filenames given inside the program. You also want to make sure in subtask_A.py that you are using the appropriate ngram_range values on 
 line 87. In the github repo, there are already the calculated output files, so running the program itself should work.
-
-## License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
-## Contact
-For any queries or support, please contact us at email@email.com.
