@@ -7,6 +7,7 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_recall_fscore_support
 from sklearn import metrics
 
 # The regular expression looks for words that possibly start with '@' 
@@ -14,6 +15,13 @@ from sklearn import metrics
 # or '?' are optional. It captures words, mentions, or hashtags in a text.
 # this information may prove useful when analyzing tweets.
 custom_token_pattern = r'(?u)[@#]?\b\w+\b[!?]?'
+
+def print_safe(text):
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # For encoding error, try explicitly encoding to utf-8
+        print(text.encode('utf-8'))
 
 # A most-frequent class baseline
 class Baseline:
@@ -76,7 +84,7 @@ if __name__ == '__main__':
         # (1,3) is unigram to trigram. If you want to individually test
         # different ngram sizes, you must set the range to be the same
         # number on either side of the comma. e.g. (2,2) = bigram 
-        ngram_custom_range = (3,3)
+        ngram_custom_range = (2,4)
         
         # tokenizing text, using a custom regular expression defined above using ngram classification.
         count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern,ngram_range=ngram_custom_range)
@@ -120,5 +128,17 @@ if __name__ == '__main__':
         # Predict the class for each test document
         results = clf.predict(test_counts)
 
+
+# Calculate precision, recall, and f1-score using scikit-learn. 
+precision, recall, f1, _ = precision_recall_fscore_support(test_klasses, results, zero_division=1,
+                                                           average='weighted', labels=['1'])
+
+# Print the results in a comma-delimited format. This allows you to easily read
+# the outputted data and then use it for data visualization in another program
+print_safe(f'Precision,Recall,F1-Score')
+print_safe(f'{precision:.3f},{recall:.3f},{f1:.3f}')
+
 # Printing the precision, recall, f1-score, macro avg, weight avg, and accuracy
+# for a more user friendly viewing in the terminal
 print(metrics.classification_report(test_klasses, results,zero_division=1))
+
