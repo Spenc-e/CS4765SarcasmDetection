@@ -13,3 +13,7 @@ data_visualization_A.py is used to plot the different f1 scores for the differen
 terminal to run. You must make sure that you use standard output to save the output
 from subtask_A.py to the filenames given inside the program. You also want to make sure in subtask_A.py that you are using the appropriate ngram_range values on 
 line 87. In the github repo, there are already the calculated output files, so running the program itself should work.
+
+For subtask A the training data is 'train.AR.csv', 'train.En.csv' and the test data is 'task_A_Ar_test.csv' and 'task_A_En_test.csv'
+For subtask B the training data is 'train.En.taskB.csv' and the test data is 'task_B_En_test.csv'
+
