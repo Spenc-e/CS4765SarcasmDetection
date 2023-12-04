@@ -86,9 +86,7 @@ if __name__ == '__main__':
 
     if method == "nb":
         
-        # count_vectorizer = CountVectorizer(analyzer=tokenize,ngram_range=(1,ngram_size))
         count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern) #ngram_range=(2,4) seems to be best
-        # unigram works best for Arabic? possibly because they don't have spaces seperating words
         
         train_counts = count_vectorizer.fit_transform(train_text)
         test_counts = count_vectorizer.transform(test_text)
@@ -98,10 +96,6 @@ if __name__ == '__main__':
 
         countKlasses(train_data,train_klasses)
         countKlasses(test_data,test_klasses)
-
-        # print("vectorized train text", train_counts)
-
-        # NB_model = make_pipeline(CountVectorizer(ngram_range=(1,ngram_size)), MultinomialNB())
 
         # Using the binary relevance method, so creating a NB model for each class
         nb_classifier = MultinomialNB()
@@ -123,14 +117,8 @@ if __name__ == '__main__':
         results = [classifier.classify(x) for x in test_text]
 
     elif method == "lr":
-        # Assuming X_train, X_test, y_train, y_test are your feature and label data
-        # where y_train and y_test are lists of lists representing the binary labels for each document
-
-        # Split the data into training and testing sets
-        #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern) #ngram_range=(2,4) seems to be best
-        # unigram works best for Arabic? possibly because they don't have spaces seperating words
         
         train_counts = count_vectorizer.fit_transform(train_text)
         test_counts = count_vectorizer.transform(test_text)
@@ -148,4 +136,4 @@ if __name__ == '__main__':
         predicted_labels = classifier.predict(test_counts)
 
         # zero_division='warn' will issue a warning when there is a class with no predictions
-        print(metrics.classification_report(test_klasses, predicted_labels,target_names=custom_target_names,zero_division='warn'))
+        print(metrics.classification_report(test_klasses, predicted_labels,target_names=custom_target_names,zero_division=0))
