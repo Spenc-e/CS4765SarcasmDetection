@@ -5,11 +5,9 @@ import sys
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.multiclass import OneVsRestClassifier
 from sklearn import metrics
 
 # Regular expression that matches words that might start with @ or #
@@ -17,6 +15,24 @@ from sklearn import metrics
 custom_token_pattern = r'(?u)[@#]?\b\w+\b[!?]?'
 
 custom_target_names = ['Sarcasm','Irony','Satire','Understatement','Overstatement','Rhetorical Question']
+
+# Reads data from a csv file
+def prepareData(file_name):
+    text = []
+    klasses = []
+
+    with open(file=file_name, mode='r', newline='', encoding='utf-8') as file:
+        csv_reader = csv.reader(file)
+
+        # Skipping header text
+        header = next(csv_reader)
+
+        for row in csv_reader:
+            text.append(row[0].lower())
+            klasses.append([int(label) for label in row[1:7]])
+    return text, klasses
+
+
 
 # Counts and prints the occurrences of classes in a dataset
 def countKlasses(file_name, klasses):
@@ -33,19 +49,6 @@ def countKlasses(file_name, klasses):
         print("\nThe number of occurances for each class in \'"+file_name+"\'")
         for class_name, count in class_counts.items():
             print(f"{class_name}: {count} occurrences")
-
-
-
-# def tokenize(text, version=''): #CURRENTLY SE DOESN'T MATTER BECAUSE DOING NGRAM WORD. MAYBE DO NGRAM CHARS TOO
-#     tokens =[]
-# # for sentence in text:
-#     if version == 'SE':
-#         tokens = ['<'+token+'>' for token in re.findall(r'[@#]?\b\w+\b[!?]?', text.casefold(), flags=re.UNICODE)] #gives us start and end info
-#     else:
-#         tokens = re.findall(r'[@#]?\b\w+\b[!?]?', text.casefold(), flags=re.UNICODE) #keeps words, @ and # at the start of word, and ?! at end
-
-#     print(tokens)
-#     return tokens
 
 # A most-frequent class baseline
 class Baseline:
@@ -73,42 +76,9 @@ if __name__ == '__main__':
     train_data = sys.argv[2]
     test_data = sys.argv[3]
 
-    # Reading the training data
-
-    # ADD THIS TO PREPAREDATA(). I WILL NEED TO CHANGE THE FORMAT OF THE COLUMNS SO THEY MATCH IN THE CSV FILES (NOT HARD)
-    with open(file=train_data, mode='r', newline='', encoding='utf-8') as file:
-        csv_reader = csv.reader(file)
-
-        # Skipping header text
-        header = next(csv_reader)
-        train_text = []
-        train_klasses = []
-        count =0
-
-        for row in csv_reader:
-            train_text.append(row[1].lower())
-            train_klasses.append([int(label) for label in row[4:10]])
-        #print(train_klasses)
-
-    # print(train_text)  
-    # print(train_klasses)  
-     
-    # Reading the test data
-    with open(file=test_data, mode='r', newline='', encoding='utf-8') as file:
-        csv_reader = csv.reader(file)
-
-        # Skipping header text
-        header = next(csv_reader)
-        test_text = []
-        test_klasses = []
-
-        for row in csv_reader:
-            test_text.append(row[0].lower())
-            test_klasses.append([int(label) for label in row[1:7]])
-
-
-
-    # print(train_klasses)
+    # Initializing data
+    train_text, train_klasses = prepareData(train_data)
+    test_text, test_klasses = prepareData(test_data)
 
     # Splitting the train data into dev data. Specifying random state to allow reproducibility
     train_docs, dev_docs,train_labels,dev_labels = train_test_split(train_text, train_klasses, test_size=0.2, random_state=4)
@@ -141,7 +111,7 @@ if __name__ == '__main__':
 
         predicted_klasses = classifier.predict(test_counts)
 
-        evaluation_report = metrics.classification_report(test_klasses, predicted_klasses, target_names=custom_target_names,zero_division='warn')
+        evaluation_report = metrics.classification_report(test_klasses, predicted_klasses, target_names=custom_target_names,zero_division=0)
 
         print('Classification Report')
         print(evaluation_report)

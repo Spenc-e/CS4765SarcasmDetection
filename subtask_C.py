@@ -8,10 +8,12 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn import metrics
+from sklearn.linear_model import LogisticRegression
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.utils.class_weight import compute_sample_weight
+from sklearn import metrics
+
+
 
 # The regular expression looks for words that possibly start with '@' 
 # or '#' and possibly end with '!' or '?'. The '@' or '#' and the '!' 
@@ -32,7 +34,7 @@ def prepareData(file_name):
 
         for row in csv_reader:
             text.append(row[0].lower())
-            klasses.append(row[1])
+            klasses.append(row[2])
     return text, klasses
 
 def print_safe(text):
@@ -82,7 +84,7 @@ if __name__ == '__main__':
         # (1,3) is unigram to trigram. If you want to individually test
         # different ngram sizes, you must set the range to be the same
         # number on either side of the comma. e.g. (2,2) = bigram 
-        ngram_custom_range = (2,4)
+        ngram_custom_range = (1,4)
 
         # The classes are unbalanced, so adding weight
         sample_weights = compute_sample_weight('balanced', y=train_klasses)
@@ -95,7 +97,7 @@ if __name__ == '__main__':
         test_counts = count_vectorizer.transform(test_text)
 
         NB_model = MultinomialNB()
-        NB_model.fit(train_counts, train_klasses, sample_weight=sample_weights)
+        NB_model.fit(train_counts, train_klasses,sample_weight=sample_weights)
         results = NB_model.predict(test_counts)
 
     elif method == "baseline":
@@ -103,25 +105,22 @@ if __name__ == '__main__':
         results = [classifier.classify(x) for x in test_text]
 
     elif method == "lr":
-        from sklearn.feature_extraction.text import CountVectorizer
-        from sklearn.linear_model import LogisticRegression
-
         # tokenizing text, using a custom regular expression defined above
         count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern)
-
-        # Classes are imbalanced, so adding weights
-        class_weights = compute_class_weight('balanced', classes=np.unique(train_klasses), y=train_klasses)
-        class_weight_dict = dict(zip(np.unique(train_klasses), class_weights))
 
         #Each cell in the matrix indicates the frequency of a type in the documents.
         train_counts = count_vectorizer.fit_transform(train_text)
         test_counts = count_vectorizer.transform(test_text)
 
+        # Classes are imbalanced, so adding weights
+        class_weights = compute_class_weight('balanced', classes=np.unique(train_klasses), y=train_klasses)
+        class_weight_dict = dict(zip(np.unique(train_klasses), class_weights))
+
+
 
         # Training a logistic regression classifier on the train data.
         # The random state is set to an arbitrary number to allow
         # reproducibility in the results
-
         lr = LogisticRegression(multi_class='multinomial',
                                 solver='sag',
                                 penalty='l2',
@@ -133,17 +132,7 @@ if __name__ == '__main__':
         # Predict the class for each test document
         results = clf.predict(test_counts)
 
-
-# Calculate precision, recall, and f1-score using scikit-learn. 
-precision, recall, f1, _ = precision_recall_fscore_support(test_klasses, results, zero_division=1,
-                                                           average='weighted', labels=['1'])
-
-# Print the results in a comma-delimited format. This allows you to easily read
-# the outputted data and then use it in data_visualization.py
-print_safe(f'Precision,Recall,F1-Score')
-print_safe(f'{precision:.3f},{recall:.3f},{f1:.3f}')
-
 # Printing the precision, recall, f1-score, macro avg, weight avg, and accuracy
 # for a more user friendly viewing in the terminal
-print(metrics.classification_report(test_klasses, results,zero_division=1))
+print(metrics.classification_report(test_klasses, results,zero_division=0))
 
