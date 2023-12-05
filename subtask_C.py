@@ -75,7 +75,7 @@ if __name__ == '__main__':
     train_text, train_klasses = prepareData(train_data)
     test_text, test_klasses = prepareData(test_data)
 
-    # Splitting the train data into dev data. Specifying random state to allow reproducibility############################################################################
+    # Splitting the train data into dev data. Specifying random state to allow reproducibility
     train_docs, dev_docs,train_labels,dev_labels = train_test_split(train_text, train_klasses, test_size=0.2, random_state=4)
 
     if method == "nb":
@@ -116,8 +116,6 @@ if __name__ == '__main__':
         class_weights = compute_class_weight('balanced', classes=np.unique(train_klasses), y=train_klasses)
         class_weight_dict = dict(zip(np.unique(train_klasses), class_weights))
 
-
-
         # Training a logistic regression classifier on the train data.
         # The random state is set to an arbitrary number to allow
         # reproducibility in the results
@@ -126,7 +124,7 @@ if __name__ == '__main__':
                                 penalty='l2',
                                 max_iter=1000,
                                 random_state=0,
-                                class_weight=class_weight_dict)
+                               )
         clf = lr.fit(train_counts, train_klasses)
 
         # Predict the class for each test document
@@ -135,4 +133,6 @@ if __name__ == '__main__':
 # Printing the precision, recall, f1-score, macro avg, weight avg, and accuracy
 # for a more user friendly viewing in the terminal
 print(metrics.classification_report(test_klasses, results,zero_division=0))
+
+
 

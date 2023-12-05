@@ -1,4 +1,5 @@
 import math
+import random
 import sklearn
 import csv
 from collections import defaultdict
@@ -32,7 +33,7 @@ def prepareData(file_name):
 
         for row in csv_reader:
             text.append(row[0].lower())
-            klasses.append(row[1])
+            klasses.append(int(row[1]))
     return text, klasses
 
 def print_safe(text):
@@ -42,22 +43,17 @@ def print_safe(text):
         # For encoding error, try explicitly encoding to utf-8
         print(text.encode('utf-8'))
 
-# A most-frequent class baseline
-class Baseline:
-    def __init__(self, klasses):
-        self.train(klasses)
+# A random class baseline
+class RandomBaseline:
+    def __init__(self, classes):
+        self.classes = classes
 
-    def train(self, klasses):
-        # Count classes to determine which is the most frequent
-        klass_freqs = {}
-        for k in klasses:
-            klass_freqs[k] = klass_freqs.get(k, 0) + 1
-        self.mfc = sorted(klass_freqs, reverse=True,
-                          key=lambda x : klass_freqs[x])[0]
-        print(klass_freqs)
+    def train(self, classes):
+        self.classes = classes
 
     def classify(self, test_instance):
-        return self.mfc
+        # Randomly select a class from the available classes
+        return random.choice(self.classes)
 
 if __name__ == '__main__':
     import sys
@@ -67,6 +63,10 @@ if __name__ == '__main__':
     method = sys.argv[1]
     train_data = sys.argv[2]
     test_data = sys.argv[3]
+
+    # Set a random seed for reproducibility when using the random baseline
+    random_seed = 7
+    random.seed(random_seed)
 
 
     # Initializing the data
@@ -99,8 +99,12 @@ if __name__ == '__main__':
         results = NB_model.predict(test_counts)
 
     elif method == "baseline":
-        classifier = Baseline(train_labels)
-        results = [classifier.classify(x) for x in test_text]
+
+        baseline_classifier = RandomBaseline(classes=[0, 1])
+
+        # Make predictions
+        results = [baseline_classifier.classify(x) for x in test_text]
+
 
     elif method == "lr":
         from sklearn.feature_extraction.text import CountVectorizer
@@ -136,7 +140,7 @@ if __name__ == '__main__':
 
 # Calculate precision, recall, and f1-score using scikit-learn. 
 precision, recall, f1, _ = precision_recall_fscore_support(test_klasses, results, zero_division=1,
-                                                           average='weighted', labels=['1'])
+                                                           average='weighted', labels=[1])
 
 # Print the results in a comma-delimited format. This allows you to easily read
 # the outputted data and then use it in data_visualization.py

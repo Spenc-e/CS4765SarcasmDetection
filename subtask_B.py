@@ -14,6 +14,7 @@ from sklearn import metrics
 # followed by a character, that might end in ! or ?
 custom_token_pattern = r'(?u)[@#]?\b\w+\b[!?]?'
 
+# Labels for the data's classes
 custom_target_names = ['Sarcasm','Irony','Satire','Understatement','Overstatement','Rhetorical Question']
 
 # Reads data from a csv file
@@ -59,9 +60,10 @@ class Baseline:
         # Count classes to determine which is the most frequent
         klass_freqs = {}
         for k in klasses:
-            klass_freqs[k] = klass_freqs.get(k, 0) + 1
-        self.mfc = sorted(klass_freqs, reverse=True,
-                          key=lambda x : klass_freqs[x])[0]
+            # Convert the list to a tuple before using it as a key
+            k_tuple = tuple(k)
+            klass_freqs[k_tuple] = klass_freqs.get(k_tuple, 0) + 1
+        self.mfc = max(klass_freqs, key=klass_freqs.get)
         print(klass_freqs)
 
     def classify(self, test_instance):
@@ -86,7 +88,7 @@ if __name__ == '__main__':
 
     if method == "nb":
         
-        count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern) #ngram_range=(2,4) seems to be best
+        count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern,ngram_range=(2,4))
         
         train_counts = count_vectorizer.fit_transform(train_text)
         test_counts = count_vectorizer.transform(test_text)
@@ -103,14 +105,7 @@ if __name__ == '__main__':
 
         classifier.fit(train_counts, train_klasses)
 
-        predicted_klasses = classifier.predict(test_counts)
-
-        evaluation_report = metrics.classification_report(test_klasses, predicted_klasses, target_names=custom_target_names,zero_division=0)
-
-        print('Classification Report')
-        print(evaluation_report)
-
-        # results = NB_model.predict(test_counts)
+        results = classifier.predict(test_counts)
 
     elif method == "baseline":
         classifier = Baseline(train_klasses)
@@ -118,13 +113,16 @@ if __name__ == '__main__':
 
     elif method == "lr":
 
-        count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern) #ngram_range=(2,4) seems to be best
+        count_vectorizer = CountVectorizer(token_pattern=custom_token_pattern,ngram_range=(2,4)) 
         
         train_counts = count_vectorizer.fit_transform(train_text)
         test_counts = count_vectorizer.transform(test_text)
 
+        countKlasses(train_data,train_klasses)
+        countKlasses(test_data,test_klasses)
+
         # Create a Logistic Regression model
-        logreg_classifier = LogisticRegression()
+        logreg_classifier = LogisticRegression(random_state=0)
 
         # Use MultiOutputClassifier for multi-label classification
         classifier = MultiOutputClassifier(logreg_classifier)
@@ -133,7 +131,9 @@ if __name__ == '__main__':
         classifier.fit(train_counts, train_klasses)
 
         # Make predictions on the test data
-        predicted_labels = classifier.predict(test_counts)
+        results = classifier.predict(test_counts)
 
-        # zero_division='warn' will issue a warning when there is a class with no predictions
-        print(metrics.classification_report(test_klasses, predicted_labels,target_names=custom_target_names,zero_division=0))
+
+# Print results.zero_division=0 will default to 0 in a class with no predictions 
+print(metrics.classification_report(test_klasses, results,target_names=custom_target_names,zero_division=0,))
+
